@@ -1,0 +1,6 @@
+{
+  "error": {
+    "message": "temperature is deprecated, use top_p instead",
+    "type": "invalid_request_error"
+  }
+}

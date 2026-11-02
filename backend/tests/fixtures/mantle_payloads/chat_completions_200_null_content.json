@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-test",
+  "object": "chat.completion",
+  "created": 1734643200,
+  "model": "minimax.m2",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": null
+      },
+      "finish_reason": "length"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 6,
+    "completion_tokens": 64,
+    "total_tokens": 70
+  }
+}

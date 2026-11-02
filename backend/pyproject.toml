@@ -1,0 +1,64 @@
+[project]
+name = "ai-eval-studio-backend"
+version = "0.1.0"
+description = "AI Eval Studio backend"
+# 3.11.4 is the floor, not 3.11.0: ``working_tree_snapshot`` passes
+# ``filter="data"`` to ``tarfile.extractall``, and that argument reached the
+# 3.11 series in 3.11.4.
+requires-python = ">=3.11.4"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    # PIN-BUMP CHECKLIST: the bundled CLI's subagent-backgrounding defense
+    # (DISABLE_GROWTHBOOK env + forced run_in_background=False hook, see
+    # agent_runner.py) goes inert on a CLI where backgrounding ships as the
+    # default. Re-verify sync subagent dispatch after every bump.
+    "claude-agent-sdk==0.2.176",
+    "python-multipart>=0.0.20",
+    "deepeval==3.9.9",
+    "boto3>=1.35.0",
+    "pandas>=2.2.0",
+    "openpyxl>=3.1.0",
+    # Cloud-mode auth: pyjwt[crypto] verifies Cognito access tokens (RS256)
+    # against the user pool's JWKS. PyJWKClient does its own fetching and
+    # caching, so no HTTP client is needed here — see
+    # platform/aws/auth_cognito_bearer.py. The ALB carries no listener
+    # authentication, so nothing parses an ALB-injected OIDC header.
+    "pyjwt[crypto]>=2.8.0",
+    # The Mantle adapter (IAM + adapter foundation) uses sync httpx for
+    # raw HTTPS + SigV4 to bedrock-mantle.{region}.api.aws. Promoted from
+    # dev-group to runtime; the mantle adapter ships in the production
+    # backend, not just tests. certifi is pinned explicitly for the new
+    # *.api.aws Amazon Trust Services CA chains (transitive via httpx
+    # today; explicit pin keeps the contract visible).
+    "httpx>=0.28.0",
+    "certifi>=2024.2.2",
+    "botocore[crt]>=1.43.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.25.0",
+    # pytest-httpx mocks the httpx layer and lets tests assert on signed
+    # SigV4 Authorization headers without monkey-patching botocore.
+    # Required by test_aws_retry.py (httpx classifier path) and the
+    # mapper tests.
+    "pytest-httpx>=0.36.2",
+    # moto fakes AWS services for the S3SessionStore SDK conformance test
+    # (tests/test_s3_session_store.py). Marked as integration; only run
+    # with `pytest -m integration`.
+    "moto>=5.0.0",
+    # ruff is the lint gate (config in the repo-root ruff.toml, enforced by
+    # tests/test_lint_gate.py and scripts/lint.sh). Selected rules are the
+    # hard-error set; F821 (undefined name) is the one that matters.
+    "ruff>=0.16.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "integration: hits real external services (AWS, network) — skipped by default. Run with `pytest -m integration`.",
+]
+addopts = "-m 'not integration'"

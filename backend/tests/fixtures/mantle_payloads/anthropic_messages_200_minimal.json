@@ -1,0 +1,17 @@
+{
+  "id": "msg_claude-opus-4-8-test",
+  "type": "message",
+  "role": "assistant",
+  "model": "anthropic.claude-opus-4-8",
+  "content": [
+    {
+      "type": "text",
+      "text": "OK."
+    }
+  ],
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 11,
+    "output_tokens": 5
+  }
+}

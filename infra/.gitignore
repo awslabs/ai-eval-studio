@@ -1,0 +1,6 @@
+.venv/
+cdk.out/
+# CDK context file: cached AZ lookups etc., regenerated on demand.
+cdk.context.json
+__pycache__/
+*.pyc

@@ -1,0 +1,126 @@
+# syntax=docker/dockerfile:1.7
+# AI Eval Studio backend — AgentCore runtime image (ARM64).
+#
+# This is the orchestrator image for Bedrock AgentCore Runtime,
+# serving the AgentCore adapter (app.agentcore_runtime:app) on port 8080.
+# It does NOT replace the Fargate coordinator image built from Dockerfile — it
+# is used only by the AgentCore stack (infra/cdk/agentcore_stack.py). Both
+# images are built for linux/arm64.
+#
+# Key differences from the Fargate image (Dockerfile):
+# - Platform pinned in the FROM lines (--platform=linux/arm64; AgentCore
+#   Runtime requires ARM64)
+# - Port: 8080 (AgentCore serving contract, not 8100)
+# - CMD: app.agentcore_runtime:app (not app.main:app)
+# - ENV: CLAUDE_CODE_USE_BEDROCK=1 baked in (Bedrock-only agent SDK)
+#
+# Non-root uid/gid 1000 is preserved (the bundled claude CLI refuses root AND
+# this matches the EFS access-point squash uid/gid in storage_stack.py). HOME
+# must be writable by the running user.
+#
+# Two stages (mirrored from Dockerfile):
+#   builder — uv installs deps from the lockfile into /app/.venv, then
+#             copies the source.
+#   runtime — same base, just the venv + source. Non-root app user.
+#
+# The base image is a TAG rather than a digest for the same reason as the
+# Fargate image — see the note in ``Dockerfile``: nothing here bumps a pinned
+# digest, so pinning one would freeze the base package set and its future CVEs.
+
+FROM --platform=linux/arm64 python:3.11-slim AS builder
+
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never
+
+# uv via the official ghcr image, pinned. Bump in lockstep with the
+# uv.lock generator on dev machines (uv --version).
+COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /usr/local/bin/uv
+
+WORKDIR /app
+
+# Layer cache: install deps from the lockfile FIRST so the deps layer stays
+# warm across source-only changes. --no-install-project skips installing
+# the local package itself; the project source comes in below.
+COPY pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project --no-dev
+
+# Now copy source and finalize the venv (installs the project package).
+COPY app ./app
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
+
+# -----------------------------------------------------------------------
+FROM --platform=linux/arm64 python:3.11-slim AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/app/.venv/bin:$PATH" \
+    # DeepEval's telemetry module tries to mkdir .deepeval on import
+    # in the current working directory. With a non-root user that fails
+    # the import — which fails the whole app boot. Opt out cleanly.
+    DEEPEVAL_TELEMETRY_OPT_OUT=YES \
+    # Agent SDK MUST use Bedrock (not direct Anthropic API). Set at image
+    # level as one defense-in-depth layer; the IaC env also sets it.
+    CLAUDE_CODE_USE_BEDROCK=1
+
+WORKDIR /app
+
+# uv + uvx in the runtime stage. Both are infrastructure for the
+# coordinator's runtime, not just dependency installation:
+#
+# 1. services/harness_runner.py shells out to uv sync and
+#    uv run python -u run_eval.py against each per-project
+#    pyproject.toml. Eval jobs hard-fail without uv.
+# 2. Scaffolded eval projects under projects/{guid}/ are
+#    designed to be runnable standalone — they
+#    each have their own pyproject.toml and depend on uv.
+# 3. uvx is the standard launcher for {"command": "uvx", ...}
+#    MCP servers if any are wired into ClaudeAgentOptions later.
+#    The bundled claude CLI spawns those during its initialize()
+#    control request; without uvx on PATH the spawn fails and
+#    initialize hangs for 60s (Control request timeout: initialize).
+#    No such MCP is wired today, but keeping uvx here is cheap.
+#
+# Pinned to the same version as the builder stage so the lockfile
+# resolver and the runtime tooling never drift.
+COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /usr/local/bin/
+
+# Non-root user — UID/GID 1000 to match the EFS access point in
+# infra/cdk/storage_stack.py (ProjectsAp chowns its root
+# directory and squashes all NFS ops to UID/GID 1000). Drift between
+# the two values would leave the container unable to write to
+# /mnt/projects.
+#
+# Non-root is also load-bearing for the Claude Agent SDK: the bundled
+# claude CLI refuses to start with --dangerously-skip-permissions
+# when getuid() === 0 (verified by reading the bundled binary).
+#
+# Home is /home/app, separate from the workdir at /app. The
+# bundled claude CLI writes config to $HOME/.claude/ on every
+# startup; if HOME isn't writable by the running user the CLI exits
+# silently with rc=0 and zero stderr — confirmed empirically by
+# running the CLI inside the live task with HOME=/app (silent exit)
+# vs HOME=/tmp (full initialize). /app is owned by root because
+# WORKDIR creates it before USER switches and the COPY --chown only
+# affects the contents we copy in, not the directory itself.
+RUN groupadd -r -g 1000 app \
+    && useradd -r -u 1000 -g app -d /home/app -s /sbin/nologin app \
+    && mkdir -p /home/app \
+    && chown app:app /home/app
+ENV HOME=/home/app
+
+COPY --from=builder --chown=app:app /app /app
+USER app
+
+EXPOSE 8080
+
+# Default command: AgentCore adapter on port 8080 (serving contract).
+# This image serves app.agentcore_runtime:app, NOT app.main:app — the
+# AgentCore orchestrator serving contract binds to 0.0.0.0:8080 and answers
+# /ping (fast probe) and /invocations (SSE streaming).
+#
+# No HEALTHCHECK directive: AgentCore readiness probe exercises GET /ping
+# (defined in agentcore_runtime.py).
+CMD ["uvicorn", "app.agentcore_runtime:app", "--host", "0.0.0.0", "--port", "8080"]

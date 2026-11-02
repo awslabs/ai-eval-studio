@@ -1,0 +1,23 @@
+# Lint configuration for the whole repo (backend + infra).
+#
+# Scoped deliberately to the rules that catch REAL defects rather than style
+# opinions. The motivating case is an undefined name (F821): a logger used in a
+# function that never bound it imports cleanly and crashes only when that line
+# runs — at startup, if that is where it sits — so an offline check is the only
+# thing that catches it first.
+#
+# The selected set is what the tree passes TODAY:
+#   E9   syntax / IO errors that stop the file being parsed at all
+#   F63  comparisons and assertions that are always-true or always-false
+#   F7   syntax-adjacent logic errors (break outside loop, f-string misuse, ...)
+#   F82  undefined names — F821 is the load-bearing member and must stay selected
+#
+# The full default rule set reports several hundred findings on this codebase
+# (mostly unused imports and unused locals). Turning those on now would make the
+# gate red on day one, and a gate nobody can pass is worse than no gate: it gets
+# bypassed and then it protects nothing. Widening the set is a deliberate
+# follow-up that needs its own clean-up pass first.
+target-version = "py311"
+
+[lint]
+select = ["E9", "F63", "F7", "F82"]

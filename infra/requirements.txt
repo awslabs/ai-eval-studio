@@ -1,0 +1,13 @@
+# Pin aws-cdk-lib to <3 so a future major-version bump doesn't quietly land
+# during ``pip install -r requirements.txt`` and break our app.py imports.
+# Floor is 2.260.0: the AgentCore ``EfsAccessPointConfigurationProperty`` used
+# in agentcore_stack.py landed in 2.260.0, so a lower floor lets a fresh
+# install synth-fail on the declarative EFS mount.
+aws-cdk-lib>=2.260.0,<3.0.0
+constructs>=10.0.0
+# AppRegistry is alpha-tier and ships separately from aws-cdk-lib. We use it
+# in app.py to create one Application + 8 stack associations so the AWS
+# Console's myApplications view groups every resource under one banner.
+# Versions track aws-cdk-lib (e.g. 2.254.0a0 pairs with aws-cdk-lib 2.254.0).
+# Fallback if API drifts: replace with the L1 ``CfnApplication`` construct.
+aws-cdk.aws-servicecatalogappregistry-alpha>=2.260.0a0,<3.0.0

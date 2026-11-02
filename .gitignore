@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+venv/
+.venv/
+.venv-test/
+env/
+
+# Node
+node_modules/
+frontend/dist/
+# npm cache
+frontend/.npm/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+pgdata/
+
+# Test
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Build
+*.log
+.dev-pids
+.dev-logs/
+
+# Projects (user data)
+projects/*
+!projects/.gitkeep
+
+# DeepEval
+.deepeval

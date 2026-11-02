@@ -1,0 +1,37 @@
+# Python build artifacts and venvs — rebuilt inside the container.
+.venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+
+# Test fixtures and tooling — not shipped to production.
+tests
+.deepeval
+
+# Dev-only Claude settings — the runtime image doesn't ship platform
+# skills, so there's nothing in ``.claude/`` the container needs.
+.claude
+
+# Docker / OS noise.
+.DS_Store
+
+# Git internals — `from_asset` already excludes .git but be explicit so a
+# bare-podman build behaves the same way.
+.git
+.gitignore
+
+# Defense-in-depth: keep secrets, certificates, and local env files out of
+# the build context so they cannot accidentally end up in an image layer.
+*.env
+.env*
+*.pem
+*.key
+*.crt
+*.p12
+
+# Frontend / node detritus that has no business in the backend image.
+node_modules

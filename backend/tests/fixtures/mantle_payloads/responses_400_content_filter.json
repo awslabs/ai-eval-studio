@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "content_filter",
+    "message": "Your request was blocked by our content safety filter.",
+    "type": "content_filter_error"
+  }
+}

@@ -1,0 +1,271 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "tw-prose";
+@import "@fontsource-variable/geist";
+/* Fonts named by the theme presets in src/lib/themes.ts. A browser fetches a
+   font file only when the active theme uses it. */
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource-variable/oxanium";
+@import "@fontsource/architects-daughter";
+@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource-variable/fira-code";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1.0000 0 0);
+  --foreground: oklch(0.1448 0 0);
+  --card: oklch(1.0000 0 0);
+  --card-foreground: oklch(0.1448 0 0);
+  --primary: oklch(0.488 0.243 264.376);
+  --primary-foreground: oklch(0.9851 0 0);
+  --secondary: oklch(0.9702 0 0);
+  --secondary-foreground: oklch(0.2046 0 0);
+  --muted: oklch(0.9702 0 0);
+  --muted-foreground: oklch(0.5555 0 0);
+  --accent: oklch(0.9702 0 0);
+  --accent-foreground: oklch(0.2046 0 0);
+  --destructive: oklch(0.5830 0.2387 28.4765);
+  --destructive-foreground: oklch(1.0000 0 0);
+  --border: oklch(0.9219 0 0);
+  --input: oklch(0.9219 0 0);
+  --ring: oklch(0.488 0.243 264.376);
+  --popover: oklch(1.0000 0 0);
+  --popover-foreground: oklch(0.1448 0 0);
+  --chart-1: oklch(0.62 0.19 260);
+  --chart-2: oklch(0.72 0.17 155);
+  --chart-3: oklch(0.80 0.16 85);
+  --chart-4: oklch(0.65 0.20 15);
+  --chart-5: oklch(0.55 0.22 290);
+  --sidebar: oklch(0.9851 0 0);
+  --sidebar-foreground: oklch(0.1448 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.9851 0 0);
+  --sidebar-accent: oklch(0.9702 0 0);
+  --sidebar-accent-foreground: oklch(0.2046 0 0);
+  --sidebar-border: oklch(0.9219 0 0);
+  --sidebar-ring: oklch(0.488 0.243 264.376);
+  --success: oklch(0.62 0.19 145);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.75 0.18 85);
+  --warning-foreground: oklch(0.25 0 0);
+  --error: oklch(0.58 0.24 27);
+  --error-foreground: oklch(1 0 0);
+  --info: oklch(0.55 0.20 255);
+  --info-foreground: oklch(1 0 0);
+  /* Data visualization */
+  --data-good: oklch(0.72 0.22 145);
+  --data-fair: oklch(0.80 0.16 100);
+  --data-neutral: oklch(0.85 0.13 88);
+  --data-warn: oklch(0.73 0.17 55);
+  --data-bad: oklch(0.65 0.23 27);
+  --data-scale-low: oklch(0.65 0.23 27);
+  --data-scale-mid: oklch(0.85 0.13 88);
+  --data-scale-high: oklch(0.72 0.22 145);
+  /* Elevation — shadow scale (Sky reference values; themable via the vars below) */
+  --shadow-color: 0 0% 0%;
+  --shadow-2xs: 0 1px 3px 0px hsl(var(--shadow-color) / 0.05);
+  --shadow-xs: 0 1px 3px 0px hsl(var(--shadow-color) / 0.05);
+  --shadow-sm: 0 1px 3px 0px hsl(var(--shadow-color) / 0.10), 0 1px 2px -1px hsl(var(--shadow-color) / 0.10);
+  --shadow: 0 1px 3px 0px hsl(var(--shadow-color) / 0.10), 0 1px 2px -1px hsl(var(--shadow-color) / 0.10);
+  --shadow-md: 0 1px 3px 0px hsl(var(--shadow-color) / 0.10), 0 2px 4px -1px hsl(var(--shadow-color) / 0.10);
+  --shadow-lg: 0 1px 3px 0px hsl(var(--shadow-color) / 0.10), 0 4px 6px -1px hsl(var(--shadow-color) / 0.10);
+  --shadow-xl: 0 1px 3px 0px hsl(var(--shadow-color) / 0.10), 0 8px 10px -1px hsl(var(--shadow-color) / 0.10);
+  --shadow-2xl: 0 1px 3px 0px hsl(var(--shadow-color) / 0.25);
+  /* Scrim/overlay behind modals — themable (replaces hardcoded bg-black/10) */
+  --overlay: hsl(var(--shadow-color) / 0.10);
+  /* Letter spacing base */
+  --tracking-normal: 0em;
+}
+
+.dark {
+  --background: oklch(0.23 0.028 260);
+  --foreground: oklch(0.9851 0 0);
+  --card: oklch(0.26 0.03 259);
+  --card-foreground: oklch(0.9851 0 0);
+  --primary: oklch(0.62 0.207 259);
+  --primary-foreground: oklch(0.9851 0 0);
+  --secondary: oklch(0.3011 0.0319 254.3009);
+  --secondary-foreground: oklch(0.9851 0 0);
+  --muted: oklch(0.2950 0.0286 259.1089);
+  --muted-foreground: oklch(0.6799 0.0218 257.4921);
+  --accent: oklch(0.3402 0.0369 254.9549);
+  --accent-foreground: oklch(0.9851 0 0);
+  --destructive: oklch(0.7022 0.1892 22.2279);
+  --destructive-foreground: oklch(0.9851 0 0);
+  --border: oklch(0.32 0.029 255);
+  --input: oklch(0.3299 0.0322 257.6775);
+  --ring: oklch(0.62 0.207 259);
+  --popover: oklch(0.2859 0.0317 256.2763);
+  --popover-foreground: oklch(0.9851 0 0);
+  --chart-1: oklch(0.78 0.15 260);
+  --chart-2: oklch(0.82 0.14 155);
+  --chart-3: oklch(0.85 0.13 85);
+  --chart-4: oklch(0.78 0.16 15);
+  --chart-5: oklch(0.72 0.18 290);
+  --sidebar: oklch(0.2454 0.0282 257.5253);
+  --sidebar-foreground: oklch(0.9851 0 0);
+  --sidebar-primary: oklch(0.62 0.207 259);
+  --sidebar-primary-foreground: oklch(0.9851 0 0);
+  --sidebar-accent: oklch(0.3011 0.0319 254.3009);
+  --sidebar-accent-foreground: oklch(0.9851 0 0);
+  --sidebar-border: oklch(0.2990 0.0285 259.1122);
+  --sidebar-ring: oklch(0.62 0.207 259);
+  --success: oklch(0.65 0.14 145);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.78 0.14 85);
+  --warning-foreground: oklch(0.20 0 0);
+  --error: oklch(0.75 0.20 25);
+  --error-foreground: oklch(1 0 0);
+  --info: oklch(0.65 0.18 255);
+  --info-foreground: oklch(1 0 0);
+  /* Shadows read weak on dark surfaces; keep black base + a heavier scrim so
+     modal overlays have real presence. Card/background lightness contrast +
+     border-border provide the primary dark-mode card separation. */
+  --shadow-color: 0 0% 0%;
+  --overlay: hsl(0 0% 0% / 0.50);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-heading: var(--font-sans);
+  /* The active theme sets these at runtime (see applyTheme), so the utilities
+     must read the variables rather than a fixed family. */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-data-good: var(--data-good);
+  --color-data-fair: var(--data-fair);
+  --color-data-neutral: var(--data-neutral);
+  --color-data-warn: var(--data-warn);
+  --color-data-bad: var(--data-bad);
+  --color-data-scale-low: var(--data-scale-low);
+  --color-data-scale-mid: var(--data-scale-mid);
+  --color-data-scale-high: var(--data-scale-high);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+  --color-overlay: var(--overlay);
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 0.875rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    letter-spacing: var(--tracking-normal);
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* Custom scrollbars matching theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Plotly modebar — theme-aware background and icon colors */
+.modebar-container {
+  /* Remove default white background that clashes in dark mode */
+  background: transparent !important;
+}
+.modebar-group {
+  background: var(--muted) !important;
+  border-radius: 4px;
+}
+.modebar-btn path {
+  fill: var(--muted-foreground) !important;
+}
+.modebar-btn:hover path {
+  fill: var(--foreground) !important;
+}
+
+/* Fullscreen chart — force Plotly to fill the available height */
+.chart-card-fullscreen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.chart-card-fullscreen > div {
+  flex: 1;
+  height: 100% !important;
+}
+.chart-card-fullscreen .js-plotly-plot,
+.chart-card-fullscreen .plot-container,
+.chart-card-fullscreen .svg-container {
+  height: 100% !important;
+}

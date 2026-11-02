@@ -1,0 +1,11 @@
+{
+  "id": "resp_test_trunc",
+  "object": "response",
+  "model": "openai.gpt-5.5",
+  "status": "incomplete",
+  "incomplete_details": {"reason": "max_output_tokens"},
+  "output": [
+    {"type": "reasoning", "id": "r_002", "summary": []}
+  ],
+  "usage": {"input_tokens": 9, "output_tokens": 16}
+}
