@@ -95,6 +95,27 @@ class TestValidateToken:
         assert validator._validate_token("not.a.jwt") is None
         assert validator._validate_token("") is None
 
+    def test_deeply_nested_payload_returns_none(self, cognito_env, cognito_jwks_inject):
+        """An unsigned token whose payload nests past the recursion limit is
+        rejected, not raised. Looking up the signing key parses the payload
+        before any signature check, and PyJWT before 2.15.0 let the parser's
+        RecursionError escape, so one unauthenticated header failed the request.
+        """
+        import base64
+        import json
+        import sys
+
+        def b64(raw: bytes) -> str:
+            return base64.urlsafe_b64encode(raw).rstrip(b"=").decode()
+
+        depth = sys.getrecursionlimit() + 100
+        header = b64(json.dumps({"alg": "RS256", "typ": "JWT", "kid": "k"}).encode())
+        payload = b64(("[" * depth + "]" * depth).encode())
+        token = f"{header}.{payload}.{b64(b'not-a-signature')}"
+
+        validator = _make_validator(cognito_env)
+        assert validator._validate_token(token) is None
+
     def test_jwks_factory_called_per_unique_url(
         self, cognito_env, cognito_jwks_inject, valid_access_token
     ):
