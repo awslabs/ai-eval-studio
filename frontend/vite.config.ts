@@ -24,22 +24,28 @@ export default defineConfig({
     },
   },
   // Vite 8's rolldown dev pre-bundler tree-shakes side-effect-only imports
-  // as "unused" — Monaco's .contribution modules register basic-languages via
-  // side effects, so they never run in dev (prod vite build is unaffected).
-  // Pin them here so the dev pre-bundler anchors them and registration runs.
+  // as "unused" — Monaco's per-language ``register`` modules and its JSON
+  // contribution register via side effects, so they never run in dev (prod
+  // vite build is unaffected). Pin them here so the dev pre-bundler anchors
+  // them and registration runs.
+  //
+  // These must be the specifiers ``src/lib/monaco-setup.ts`` imports. The
+  // package's exports map rewrites ``monaco-editor/<p>`` to ``esm/vs/<p>.js``,
+  // so an entry written with the ``esm/vs/`` prefix resolves to nothing: vite
+  // only warns "Failed to resolve dependency" and pins nothing.
   optimizeDeps: {
     include: [
-      "monaco-editor/esm/vs/editor/editor.api",
-      "monaco-editor/esm/vs/basic-languages/python/python.contribution",
-      "monaco-editor/esm/vs/basic-languages/markdown/markdown.contribution",
-      "monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution",
-      "monaco-editor/esm/vs/basic-languages/ini/ini.contribution",
-      "monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution",
-      "monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution",
-      "monaco-editor/esm/vs/basic-languages/html/html.contribution",
-      "monaco-editor/esm/vs/basic-languages/css/css.contribution",
-      "monaco-editor/esm/vs/basic-languages/shell/shell.contribution",
-      "monaco-editor/esm/vs/language/json/monaco.contribution",
+      "monaco-editor/editor/editor.api",
+      "monaco-editor/languages/definitions/python/register",
+      "monaco-editor/languages/definitions/markdown/register",
+      "monaco-editor/languages/definitions/yaml/register",
+      "monaco-editor/languages/definitions/ini/register",
+      "monaco-editor/languages/definitions/javascript/register",
+      "monaco-editor/languages/definitions/typescript/register",
+      "monaco-editor/languages/definitions/html/register",
+      "monaco-editor/languages/definitions/css/register",
+      "monaco-editor/languages/definitions/shell/register",
+      "monaco-editor/language/json/monaco.contribution",
     ],
   },
   server: {

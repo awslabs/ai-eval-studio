@@ -184,37 +184,55 @@ run_js_deps() {
   python3 -c '
 import json, sys
 
-# Known and dispositioned, by package name. An entry here is a finding whose
-# reason is written down, NOT a finding being hidden — the gate stays red for
-# anything not on this list.
+# Known and dispositioned, by ADVISORY id, never by package name: a package
+# entry would pass the next advisory for that package as known. An entry here
+# is a finding whose reason is written down, NOT a finding being hidden. A
+# package is known only when every advisory reaching it, directly or through a
+# dependency, is listed; anything else is NEW and fails the gate.
 #
-# dompurify: monaco-editor ships its own inlined copy at
-# esm/vs/base/browser/dompurify/ and imports THAT, so the copy npm resolves is
-# not what the browser runs. Four advisories affect <=3.4.12 and monaco 0.56.0 —
-# the newest release — pins 3.4.8, so no upgrade clears them today. An overrides
-# entry WOULD make this report clean, and that is exactly why there is not one:
-# it would move a package nothing imports and turn this signal into false
-# comfort. Monaco reaches none of the four (it never calls setConfig,
-# clearConfig, IN_PLACE or CUSTOM_ELEMENT_HANDLING). Revisit at monaco 0.57.
-# monaco-editor: not a separate advisory. npm reports a parent package whose
-# only ``via`` is the child, so it disappears with the entry above.
-DISPOSITIONED = {"dompurify", "monaco-editor"}
+# DOMPurify, through monaco-editor. Monaco imports its own inlined copy at
+# esm/vs/base/browser/dompurify/, which is 3.4.15 in monaco 0.57.0 (the newest
+# release), so neither an upgrade nor an overrides entry changes the bytes the
+# browser runs; an override would only make this report read clean. Each of
+# these needs a sanitizer option monaco never sets. Its sanitize path uses
+# ALLOWED_TAGS, ALLOWED_ATTR, ALLOW_UNKNOWN_PROTOCOLS, hooks, RETURN_DOM_FRAGMENT
+# and RETURN_TRUSTED_TYPE, never IN_PLACE, SAFE_FOR_TEMPLATES or
+# PARSER_MEDIA_TYPE. Revisit when monaco vendors 3.4.17 or later.
+DISPOSITIONED = {
+    "GHSA-6688-9rhm-gjv2": "needs IN_PLACE",
+    "GHSA-mrv2-3pqr-j5jr": "needs IN_PLACE",
+    "GHSA-p98j-92pf-mc4p": "needs IN_PLACE",
+    "GHSA-cg2g-xh64-v4q7": "needs SAFE_FOR_TEMPLATES",
+    "GHSA-c6gr-qvv4-5v3f": "needs PARSER_MEDIA_TYPE",
+}
 
 text = open(sys.argv[1]).read()
 # npm appends notice lines after the JSON on some versions.
 report = json.loads(text[: text.rindex("}") + 1])
 vulns = report.get("vulnerabilities", {})
 
-unexpected = {
-    name: v.get("severity")
-    for name, v in vulns.items()
-    if name not in DISPOSITIONED
-}
-for name in sorted(DISPOSITIONED & set(vulns)):
+
+def advisories(name, seen=()):
+    """Every advisory id reaching ``name``, following package-name ``via`` links."""
+    found = set()
+    for via in vulns.get(name, {}).get("via", []):
+        if isinstance(via, dict):
+            found.add(via.get("url", "").rsplit("/", 1)[-1] or via.get("title", "?"))
+        elif via not in seen:
+            found |= advisories(via, seen + (name,))
+    return found
+
+
+unexpected = {}
+for name in sorted(vulns):
+    ids = advisories(name)
+    open_ids = sorted(ids - set(DISPOSITIONED))
     sev = vulns[name].get("severity")
-    print(f"  known: {name} ({sev}) — see the note in this script")
-for name, sev in sorted(unexpected.items()):
-    print(f"  NEW:   {name} ({sev})")
+    if open_ids:
+        unexpected[name] = open_ids
+        print(f"  NEW:   {name} ({sev}):", ", ".join(open_ids))
+    else:
+        print(f"  known: {name} ({sev}):", ", ".join(sorted(ids)))
 print(f"  total {len(vulns)} package(s); {len(unexpected)} not yet dispositioned")
 sys.exit(1 if unexpected else 0)
 ' "$report"

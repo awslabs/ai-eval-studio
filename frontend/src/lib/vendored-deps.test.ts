@@ -51,14 +51,10 @@ describe("monaco-editor's inlined DOMPurify", () => {
    * `node_modules/dompurify` an override can reach, so patching DOMPurify here
    * means upgrading monaco.
    *
-   * The floor is what monaco currently ships, NOT a fully-patched DOMPurify.
-   * Four advisories still affect <=3.4.12 and monaco 0.56.0 — the newest
-   * release — pins 3.4.8, so no monaco upgrade clears them today. Monaco's own
-   * usage does not reach any of the four: it never calls `setConfig`,
-   * `clearConfig`, `IN_PLACE` or `CUSTOM_ELEMENT_HANDLING` (it calls `sanitize`
-   * with `RETURN_DOM_FRAGMENT`/`RETURN_TRUSTED_TYPE` and clears hooks with
-   * `removeAllHooks`). Raise this floor to 3.4.13 when a monaco release carries
-   * it.
+   * The floor is 3.4.15, what monaco 0.57.0 ships (0.56.0 pinned 3.4.8). It
+   * is not past every DOMPurify advisory: some cover up to 3.4.16. Each of
+   * those needs a sanitizer option monaco never sets, and `scripts/scan-local.sh`
+   * lists them by advisory id with that reason.
    */
   it("is at or above the version monaco currently pins", () => {
     const vendored = require_.resolve(
@@ -72,7 +68,7 @@ describe("monaco-editor's inlined DOMPurify", () => {
       `no DOMPurify version banner in ${vendored} — monaco may have changed how ` +
         "it vendors DOMPurify, so this floor is no longer being checked",
     ).not.toBeNull();
-    expect(atLeast(match![1], "3.4.8"), `vendored DOMPurify is ${match![1]}`).toBe(
+    expect(atLeast(match![1], "3.4.15"), `vendored DOMPurify is ${match![1]}`).toBe(
       true,
     );
   });
