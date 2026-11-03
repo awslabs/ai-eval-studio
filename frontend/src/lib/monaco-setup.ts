@@ -40,6 +40,22 @@ import { loader } from "@monaco-editor/react";
 // Slim editor core — does NOT bring the basic-language registry with it.
 import * as monaco from "monaco-editor/editor/editor.api";
 
+/* Editor features: hover, find, the context menu, quick fixes, code lens and
+ * the rest, with the services each one depends on. The slim core above has
+ * none of them.
+ *
+ * This must load here, before any editor exists. The standalone editor fixes
+ * its set of services when the first editor is created, but keeps attaching
+ * contributions registered later to every new editor. Left alone, this module
+ * arrives lazily with the JSON language service when the first JSON model
+ * appears, so every editor after that point gets contributions whose services
+ * are missing and throws "depends on UNKNOWN service" on mount.
+ *
+ * It is the module the language services load, rather than a hand-written list
+ * of contributions, so the set registered here is the set that would otherwise
+ * arrive late. ``monaco-setup.test.ts`` fails if anything still does. */
+import "monaco-editor/internal/common/workers";
+
 /* Workers: each Monaco language service has its own dedicated web
  * worker. Vite's ``?worker`` query suffix compiles each one into a
  * same-origin chunk we wire up via ``MonacoEnvironment``.

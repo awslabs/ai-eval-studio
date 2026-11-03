@@ -24,8 +24,9 @@ export default defineConfig({
     },
   },
   // Vite 8's rolldown dev pre-bundler tree-shakes side-effect-only imports
-  // as "unused" — Monaco's per-language ``register`` modules and its JSON
-  // contribution register via side effects, so they never run in dev (prod
+  // as "unused" — Monaco's per-language ``register`` modules, its JSON
+  // contribution and its editor-features module (``internal/common/workers``)
+  // register via side effects, so they never run in dev (prod
   // vite build is unaffected). Pin them here so the dev pre-bundler anchors
   // them and registration runs.
   //
@@ -36,6 +37,7 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       "monaco-editor/editor/editor.api",
+      "monaco-editor/internal/common/workers",
       "monaco-editor/languages/definitions/python/register",
       "monaco-editor/languages/definitions/markdown/register",
       "monaco-editor/languages/definitions/yaml/register",
