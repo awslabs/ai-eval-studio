@@ -4,7 +4,7 @@
 # in agentcore_stack.py landed in 2.260.0, so a lower floor lets a fresh
 # install synth-fail on the declarative EFS mount.
 aws-cdk-lib>=2.260.0,<3.0.0
-constructs>=10.0.0
+constructs>=10.8.1
 # AppRegistry is alpha-tier and ships separately from aws-cdk-lib. We use it
 # in app.py to create one Application + 8 stack associations so the AWS
 # Console's myApplications view groups every resource under one banner.
